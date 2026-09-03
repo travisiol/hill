@@ -173,3 +173,17 @@ treated as money you are willing to lose. Nothing here is financial advice. The
 chain values in `src/lib/chain.ts` came from public third-party sources and
 must be re-verified against the official documentation before this app is
 pointed at real funds.
+
+## Checking the rule
+
+```bash
+npm run check
+```
+
+`scripts/check-rule.mts` runs the payout rule against the exact case the site
+argues from: one hour, four reigns, a wallet arriving at 55 minutes. It asserts
+that A wins with 39 minutes, that the late arrival scores exactly the five
+minutes it held, that the reigns tile the hour to the second, that a reign
+crossing the bell is credited to both hours separately, and that a dead hour
+rolls instead of paying. If the rule is ever loosened into a snapshot, this
+fails before the page can start claiming otherwise.

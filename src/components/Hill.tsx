@@ -3,28 +3,34 @@
 /*
  * The hill.
  *
- * One machined tile on a bench, drawn in real perspective — not axonometry.
- * There is exactly one object here and the argument is that everyone wants
- * to stand on it, so the projection that makes the centre of the frame the
- * most important place in it is the right one.
+ * A machined block on a bench, whoever holds the crown standing on top of it
+ * with both arms up, and everybody else in this hour crowded around the base.
+ * Real perspective, not axonometry: there is one object here and the argument
+ * is that everyone wants to be on it, so the projection that makes the centre
+ * of the frame the most important place in it is the right one.
  *
- * Three things are true on screen and all three are true off it:
+ * Four things are true on screen and all four are true off it:
  *
- *   THE LIGHT IS THE CLOCK. The key light swings once around the tile per
+ *   THE LIGHT IS THE CLOCK. The key light swings once around the block per
  *   hour, so the shadow sweeps the bench like a sundial and the frame tells
  *   you how far into the hour you are before you have read a number. This
  *   works before anything is deployed, because the hour does not need a
  *   contract to be real.
  *
- *   THE RING IS THE HOUR. The band on the bench is the sixty minutes, midnight
- *   at the top, clockwise. Every reign inside this hour is an arc of it, and
- *   the longest arc is drawn in amber because the longest arc is the one that
+ *   THE RING IS THE HOUR. The band on the bench is the sixty minutes, :00 at
+ *   the top, clockwise. Every reign inside this hour is an arc of it, and the
+ *   longest arc is drawn in amber because the longest arc is the one that
  *   wins. That is the payout rule rendered as a picture rather than described
  *   beside one.
  *
- *   AMBER MEANS WORN. The crown band around the tile's chamfer is a hairline
- *   until somebody actually holds it. Before launch there is no amber in this
- *   canvas at all.
+ *   THE CROWD IS THE STANDINGS. The figure on top is whoever holds the crown;
+ *   each solid figure at the base is an address that has actually banked time
+ *   this hour, in rank order. The remaining places are outlines, because an
+ *   empty place is somewhere nobody is standing.
+ *
+ *   AMBER MEANS WORN, and there is exactly one amber object: the crown. The
+ *   podium carries no colour of its own. Before launch the crown is a dashed
+ *   outline above an empty throne, and there is no amber in this canvas at all.
  *
  * Everything is drawn. No textures, no raster assets, no WebGL.
  */
@@ -167,17 +173,20 @@ function project(p: Vec3, c: Camera): Pt {
 }
 
 /*
- * Proportions, and they took three passes.
+ * Proportions.
  *
- * At 1.0 × 0.38 the tile read as a lid — something you take off a box rather
- * than something you stand on. At 0.9 × 0.55 it was a plinth, which is a
- * monument and the wrong idea entirely: this is a place people are trying to
- * push each other off, not a pedestal somebody was awarded. 0.92 × 0.44 is a
- * block you could climb onto, which is what it is.
+ * The podium was a slab for four passes and it was wrong the whole time. A
+ * 0.4-tall plate is something you put an object ON; the thing this game is
+ * about is a block people climb. Raised to 0.62 it reads as a podium, and the
+ * figure on top stops looking like an ornament placed on a tray.
  *
- * The half-width came back down to 0.76 once the tile was turned. Turned 35°
- * a square reaches √2 times further across the frame than it does square-on,
- * so the same number that fitted comfortably inside the dial now covered it,
+ * Not a true cube, though — matching the reference exactly would mean a height
+ * of 1.52, which buries the hour ring behind it. 0.62 is the tallest the block
+ * gets before it starts eating its own clock.
+ *
+ * The half-width is 0.76 because the tile is turned 35°, and a square turned
+ * 35° reaches √2 further across the frame than it does square-on: the number
+ * that fitted comfortably inside the dial before the turn covered it after,
  * hid the :00 mark and left the hour as a thin halo behind the subject.
  *
  * The ring came in from 1.9 at the same time. Wide, it made a grey donut that
@@ -185,14 +194,16 @@ function project(p: Vec3, c: Camera): Pt {
  * fight, not the subject of the picture.
  */
 const TILE_W = 0.76; // half-width
-const TILE_H = 0.4;
-// Wide enough to be a band rather than a line: the crown lives on it, and at
-// 0.048 the amber came out as a stroke around the top face — a frame laid on
-// the tile instead of the rim of the tile itself.
-const CHAMFER = 0.064;
+const TILE_H = 0.62;
+// Wide enough to read as a milled edge rather than a drawn line.
+const CHAMFER = 0.058;
 const RING_IN = 1.52;
 const RING_OUT = 1.74;
 const TICK_OUT = 1.84;
+
+/** How tall the people are, in world units. */
+const KING_H = 0.85;
+const BYSTANDER_H = 0.44;
 
 /*
  * The tile is turned on the bench, and this is the single change that did the
@@ -424,8 +435,15 @@ export function Hill({ changes, live, className, preview = false }: HillProps) {
         // Above centre, not on it: the tile stands up out of the bench, so
         // its own height uses the space above the origin and the near edge of
         // the ring needs room below for the readout that sits on it.
-        cy: height * 0.5,
-        scale: Math.max(46, Math.min(width * 0.2, height * 0.36)),
+        /*
+         * Below centre. The scene grew upward when the podium became a block
+         * and somebody climbed onto it — the tallest thing in frame is now
+         * the crown, about 1.9 units off the bench, against a ring that
+         * reaches 2.2 sideways. Keeping the origin on the midline pushed the
+         * crown into the readouts.
+         */
+        cy: height * 0.55,
+        scale: Math.max(46, Math.min(width * 0.2, height * 0.3)),
       };
 
       /*
@@ -480,9 +498,50 @@ export function Hill({ changes, live, className, preview = false }: HillProps) {
         live: state.current.live,
       });
 
-      // ---- the tile ------------------------------------------------------
-      const worn = state.current.changes.length > 0;
-      drawTile(ctx, cam, palette, { light, lift, worn, wear: worn ? 1 : 0 });
+      /* ---- the podium and everybody on it ------------------------------
+       *
+       * The crowd is the standings. Whoever holds the crown stands on top;
+       * every other address that has banked time this hour is a figure at the
+       * base, in rank order, so the picture and the table below it cannot
+       * disagree about who is in this fight. The remaining places are drawn
+       * as outlines — an empty spot is a spot nobody is standing in, which is
+       * exactly what the game looks like before it starts.
+       *
+       * Far figures go down before the podium and near ones after it, so the
+       * back of the crowd is properly hidden behind the hill. The king is
+       * always last: nothing in this scene is in front of him, which is the
+       * whole point of being up there.
+       */
+      const kingHolder =
+        state.current.changes.length > 0
+          ? state.current.changes[state.current.changes.length - 1].holder
+          : null;
+      const contenders = standings.filter((s) => s.holder !== kingHolder).length;
+      const podiumDepth = project({ x: 0, y: 0, z: 0 }, cam).d;
+
+      const crowd = CROWD.map((slot, i) => {
+        const pos = onRing(slot.angle, slot.radius);
+        const { base, px } = standing(pos.x, pos.z, 0, BYSTANDER_H, cam);
+        return { base, px, solid: i < contenders, depth: project(pos, cam).d };
+      });
+
+      for (const f of crowd) {
+        if (f.depth <= podiumDepth) continue;
+        drawBystander(ctx, palette, f.base.x, f.base.y, f.px, f.solid);
+      }
+
+      drawTile(ctx, cam, palette, { light, lift });
+
+      for (const f of crowd) {
+        if (f.depth > podiumDepth) continue;
+        drawBystander(ctx, palette, f.base.x, f.base.y, f.px, f.solid);
+      }
+
+      const worn = kingHolder !== null;
+      const throne = standing(0, 0, TILE_H + lift, KING_H, cam);
+      drawKing(ctx, palette, throne.base.x, throne.base.y, throne.px, worn);
+
+      drawDial(ctx, cam, palette);
 
       // ---- the strike ripple ---------------------------------------------
       if (striking) drawRipple(ctx, cam, palette, strikeT);
@@ -509,8 +568,8 @@ export function Hill({ changes, live, className, preview = false }: HillProps) {
       role="img"
       aria-label={
         live
-          ? "The hill: one tile on a bench, ringed by the current hour, with each reign drawn as an arc."
-          : "The hill: one tile on a bench, ringed by the current hour. No reign has been recorded yet."
+          ? "The hill: a block on a bench ringed by the current hour, the crown holder standing on top and the other contenders around the base."
+          : "The hill: a block on a bench ringed by the current hour. Nobody is on it — the crown and the crowd are drawn as empty outlines."
       }
     >
       <canvas ref={canvasRef} className="block h-full w-full" />
@@ -686,8 +745,17 @@ function drawRing(
   ctx.strokeStyle = css(p.ink, 0.2);
   ctx.lineWidth = 1;
   ctx.stroke();
+}
 
-  // Quarter labels, set on the bench rather than floated over it.
+/**
+ * The quarter marks.
+ *
+ * Drawn last, over everything, because they are annotations on a drawing and
+ * not objects in the scene. Set on the bench in depth order they were the
+ * only two that survived: :00 sits directly behind whoever is on the podium
+ * and vanished behind the crown, and a dial missing its twelve is not a dial.
+ */
+function drawDial(ctx: CanvasRenderingContext2D, cam: Camera, p: Palette) {
   const labels: [number, string][] = [
     [0, ":00"],
     [0.25, ":15"],
@@ -695,17 +763,24 @@ function drawRing(
     [0.75, ":45"],
   ];
   ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
-  if ("letterSpacing" in ctx) {
+  const spaced = "letterSpacing" in ctx;
+  if (spaced) {
     (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0.12em";
   }
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = css(p.inkMute, 0.9);
   for (const [t, text] of labels) {
-    const q = project(onRing(t, TICK_OUT + 0.32), cam);
+    const q = project(onRing(t, TICK_OUT + 0.3), cam);
+    // A disc of the page ground behind each mark, so a label that lands on
+    // the ring band or on a figure is still readable without an outline.
+    ctx.beginPath();
+    ctx.ellipse(q.x, q.y, 17, 9, 0, 0, Math.PI * 2);
+    ctx.fillStyle = css(p.field, 0.82);
+    ctx.fill();
+    ctx.fillStyle = css(p.inkMute, 1);
     ctx.fillText(text, q.x, q.y);
   }
-  if ("letterSpacing" in ctx) {
+  if (spaced) {
     (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
   }
 }
@@ -713,15 +788,13 @@ function drawRing(
 interface TileArgs {
   light: Vec3;
   lift: number;
-  worn: boolean;
-  wear: number;
 }
 
 function drawTile(
   ctx: CanvasRenderingContext2D,
   cam: Camera,
   p: Palette,
-  { light, lift, worn }: TileArgs,
+  { light, lift }: TileArgs,
 ) {
   const base = square(TILE_W, lift);
   const shoulder = square(TILE_W, TILE_H - CHAMFER + lift);
@@ -922,20 +995,8 @@ function drawTile(
        * is the rim of the part itself catching light, which is the difference
        * between something decorated and something lit.
        */
-      if (worn) {
-        // Amber mixed INTO the face's own tone rather than laid over it, so
-        // the chamfer still shades with the light. Replaced outright it came
-        // out as a flat gold strip — a frame around the tile instead of metal
-        // that has gone hot.
-        grad.addColorStop(
-          0,
-          css(mix(mix(bodyTop, p.crownLit, 0.82), WHITE, 0.22 + lambert * 0.28)),
-        );
-        grad.addColorStop(1, css(mix(mix(bodyBase, p.crown, 0.8), p.crownLit, lambert * 0.45)));
-      } else {
-        grad.addColorStop(0, css(mix(bodyTop, p.topLit, 0.55)));
-        grad.addColorStop(1, css(mix(bodyTop, p.edge, 0.2)));
-      }
+      grad.addColorStop(0, css(mix(bodyTop, p.topLit, 0.55)));
+      grad.addColorStop(1, css(mix(bodyTop, p.edge, 0.2)));
     } else {
       grad.addColorStop(0, css(bodyTop));
       grad.addColorStop(1, css(bodyBase));
@@ -946,39 +1007,13 @@ function drawTile(
     ctx.fill();
   }
 
-  /*
-   * The crown line.
-   *
-   * Unworn it is a dashed hairline where the chamfer meets the top face: the
-   * band is drawn and not lit, which is the same sentence the rest of the page
-   * makes about everything that has not happened yet. Worn, the chamfer above
-   * already carries the colour, so all this adds is the seam that separates it
-   * from the top face, plus a soft throw onto the bench around the object —
-   * light that has left the part.
-   */
-  const bandTop = top.map((v) => project(v, cam));
-
-  if (worn) {
-    ctx.save();
-    if (typeof ctx.filter === "string") ctx.filter = "blur(9px)";
-    pathOf(ctx, bandTop);
-    ctx.strokeStyle = css(p.crownLit, 0.42);
-    ctx.lineWidth = 7;
-    ctx.stroke();
-    ctx.restore();
-
-    pathOf(ctx, bandTop);
-    ctx.strokeStyle = css(mix(p.crownLit, WHITE, 0.4), 0.9);
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  } else {
-    pathOf(ctx, bandTop);
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = css(p.ink, 0.22);
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
+  // The seam where the chamfer meets the top face. The podium carries no
+  // colour of its own any more — the crown does, and it is now an object
+  // somebody is holding rather than a band around a block.
+  pathOf(ctx, top.map((v) => project(v, cam)));
+  ctx.strokeStyle = css(p.ink, 0.1);
+  ctx.lineWidth = 1;
+  ctx.stroke();
 
   // The silhouette. One hairline around the whole object — the difference
   // between a solid that was milled and one that was airbrushed. Taken in
@@ -1011,6 +1046,331 @@ function hullScreen(points: Pt[]): Pt[] {
   lower.pop();
   upper.pop();
   return lower.concat(upper);
+}
+
+/* ---- the people --------------------------------------------------------
+ *
+ * Figures are drawn as billboards: their standing point is projected in 3D so
+ * they sit correctly on the bench and shrink with distance, but the body
+ * itself is laid out in screen space. Nothing here is rotationally
+ * asymmetric — a sphere head and round-capped tubes look the same from every
+ * side — so there is no view for the trick to fail in, and it costs a fraction
+ * of what a real mesh would.
+ *
+ * Two states, and they are the same two the rest of the page uses.
+ *
+ *   SOLID is a real contender. It has a gradient body and a contact shadow.
+ *   Every solid figure on the bench corresponds to an address in the
+ *   standings — the king on the podium is the one wearing the crown, and each
+ *   figure below is somebody who has actually banked time this hour.
+ *
+ *   OUTLINE is a place nobody is standing. Before launch the whole scene is
+ *   outlines, which is what an empty game looks like: a podium, a drawn crown
+ *   above an empty throne, and a ring of people who have not turned up.
+ */
+
+/** Vertical of world length `h` standing at (x, z) on a surface at y0. */
+function standing(
+  x: number,
+  z: number,
+  y0: number,
+  h: number,
+  cam: Camera,
+): { base: Pt; px: number } {
+  const base = project({ x, y: y0, z }, cam);
+  const top = project({ x, y: y0 + h, z }, cam);
+  return { base, px: Math.max(6, base.y - top.y) };
+}
+
+/**
+ * Where the crowd stands.
+ *
+ * Seven fixed places, jittered by hand rather than by a generator: an even
+ * seven around a circle reads as a fence, and a random seven moves every
+ * frame. The radii sit between the podium's corner reach (1.07) and the inner
+ * edge of the hour ring (1.52), so the crowd never climbs the hill and never
+ * stands on the clock.
+ *
+ * They are ordered by rank, and the order runs from the front of the ring
+ * outward. The first version ordered them from :00, which is the FAR side —
+ * the two real contenders in the worked hour were both filed behind the
+ * block, where the podium hid the only two solid figures on the bench. Rank 0
+ * now stands nearest the reader.
+ */
+const CROWD: { angle: number; radius: number }[] = [
+  { angle: 0.5, radius: 1.3 },
+  { angle: 0.38, radius: 1.37 },
+  { angle: 0.62, radius: 1.34 },
+  { angle: 0.27, radius: 1.42 },
+  { angle: 0.73, radius: 1.39 },
+  { angle: 0.12, radius: 1.33 },
+  { angle: 0.88, radius: 1.36 },
+];
+
+/** A body gradient: lit from above, the way every other surface here is. */
+function bodyPaint(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  x: number,
+  footY: number,
+  h: number,
+): CanvasGradient {
+  const g = ctx.createLinearGradient(x, footY - h * 1.05, x, footY);
+  g.addColorStop(0, css(mix(p.topLit, WHITE, 0.55)));
+  g.addColorStop(0.45, css(p.top));
+  g.addColorStop(1, css(mix(p.left, p.right, 0.45)));
+  return g;
+}
+
+/** The soft dark patch a body puts on whatever it is standing on. */
+function contactPatch(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  x: number,
+  y: number,
+  w: number,
+) {
+  ctx.save();
+  if (typeof ctx.filter === "string") ctx.filter = `blur(${Math.max(1, w * 0.22)}px)`;
+  ctx.beginPath();
+  ctx.ellipse(x, y, w * 0.62, w * 0.24, 0, 0, Math.PI * 2);
+  ctx.fillStyle = css(p.ink, 0.22);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** A round-capped tube, which is every limb and torso in this scene. */
+function tube(
+  ctx: CanvasRenderingContext2D,
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  width: number,
+  paint: string | CanvasGradient,
+) {
+  ctx.beginPath();
+  ctx.moveTo(ax, ay);
+  ctx.lineTo(bx, by);
+  ctx.lineCap = "round";
+  ctx.lineWidth = width;
+  ctx.strokeStyle = paint;
+  ctx.stroke();
+}
+
+/** One of the crowd: a dome body and a head, no limbs. */
+function drawBystander(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  x: number,
+  footY: number,
+  h: number,
+  solid: boolean,
+) {
+  const bodyW = h * 0.46;
+  const bodyTop = footY - h * 0.6;
+  const headR = h * 0.17;
+  const headY = footY - h * 0.84;
+
+  if (solid) contactPatch(ctx, p, x, footY, bodyW);
+
+  const paint = bodyPaint(ctx, p, x, footY, h);
+
+  // Body: a tube from the ground up, so the top is a dome and the base is
+  // flat where it meets the bench.
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x - bodyW, footY - h * 1.4, bodyW * 2, h * 1.4);
+  ctx.clip();
+  if (solid) {
+    tube(ctx, x, bodyTop + bodyW / 2, x, footY + bodyW / 2, bodyW, paint);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(x - bodyW / 2, footY);
+    ctx.lineTo(x - bodyW / 2, bodyTop + bodyW / 2);
+    ctx.arc(x, bodyTop + bodyW / 2, bodyW / 2, Math.PI, 0);
+    ctx.lineTo(x + bodyW / 2, footY);
+    ctx.strokeStyle = css(p.ink, 0.34);
+    ctx.lineWidth = 1;
+    ctx.lineCap = "butt";
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(x, headY, headR, 0, Math.PI * 2);
+  if (solid) {
+    ctx.fillStyle = paint;
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = css(p.ink, 0.34);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+/** The crown, held up. Amber when it is actually worn, drawn when it is not. */
+function drawCrownShape(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  cx: number,
+  baseY: number,
+  w: number,
+  h: number,
+  worn: boolean,
+) {
+  const left = cx - w / 2;
+  const right = cx + w / 2;
+  const notch = baseY - h * 0.42;
+  const apex = baseY - h;
+
+  const path = () => {
+    ctx.beginPath();
+    ctx.moveTo(left, baseY);
+    ctx.lineTo(left, apex);
+    ctx.lineTo(left + w * 0.26, notch);
+    ctx.lineTo(cx, apex - h * 0.08);
+    ctx.lineTo(right - w * 0.26, notch);
+    ctx.lineTo(right, apex);
+    ctx.lineTo(right, baseY);
+    ctx.closePath();
+  };
+
+  if (worn) {
+    // The only amber left on the object, and it is on the one thing the game
+    // is played for. A soft throw first, so it reads as lit rather than
+    // painted, then the body over it.
+    ctx.save();
+    if (typeof ctx.filter === "string") ctx.filter = `blur(${Math.max(3, w * 0.34)}px)`;
+    path();
+    ctx.fillStyle = css(p.crownLit, 0.32);
+    ctx.fill();
+    ctx.restore();
+
+    const g = ctx.createLinearGradient(cx, apex, cx, baseY);
+    g.addColorStop(0, css(mix(p.crownLit, WHITE, 0.5)));
+    g.addColorStop(0.55, css(p.crownLit));
+    g.addColorStop(1, css(p.crown));
+    path();
+    ctx.fillStyle = g;
+    ctx.fill();
+  } else {
+    path();
+    ctx.strokeStyle = css(p.ink, 0.34);
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // The opening of the band, which is what stops it reading as a flat cutout.
+  ctx.beginPath();
+  ctx.ellipse(cx, baseY, w * 0.5, h * 0.11, 0, 0, Math.PI * 2);
+  if (worn) {
+    ctx.fillStyle = css(mix(p.crown, p.ink, 0.35));
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = css(p.ink, 0.22);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+/** Whoever is on top: legs, torso, head, both arms up, crown above the hands. */
+function drawKing(
+  ctx: CanvasRenderingContext2D,
+  p: Palette,
+  x: number,
+  footY: number,
+  h: number,
+  solid: boolean,
+) {
+  const paint = solid ? bodyPaint(ctx, p, x, footY, h) : css(p.ink, 0.32);
+  const line = (
+    ax: number,
+    ay: number,
+    bx: number,
+    by: number,
+    w: number,
+  ) => {
+    if (solid) {
+      tube(ctx, ax, ay, bx, by, w, paint);
+      return;
+    }
+    // Outlined, a tube is its own silhouette: two parallel edges and two
+    // round caps. Stroking the centre line instead would draw a stick figure,
+    // which is a different drawing altogether.
+    const dx = bx - ax;
+    const dy = by - ay;
+    const len = Math.hypot(dx, dy) || 1;
+    const nx = (-dy / len) * (w / 2);
+    const ny = (dx / len) * (w / 2);
+    const angle = Math.atan2(dy, dx);
+    ctx.beginPath();
+    ctx.moveTo(ax + nx, ay + ny);
+    ctx.lineTo(bx + nx, by + ny);
+    ctx.arc(bx, by, w / 2, angle + Math.PI / 2, angle - Math.PI / 2, true);
+    ctx.lineTo(ax - nx, ay - ny);
+    ctx.arc(ax, ay, w / 2, angle - Math.PI / 2, angle + Math.PI / 2, true);
+    ctx.closePath();
+    ctx.strokeStyle = css(p.ink, 0.32);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  };
+
+  if (solid) contactPatch(ctx, p, x, footY, h * 0.4);
+
+  /*
+   * Proportions, and the first set was wrong in a way that only shows once
+   * it is drawn: a torso at 0.25h with arms at 0.1h leaving the shoulder,
+   * all painted from one gradient, merged into a single white column. The
+   * head disappeared into it and the figure lost both arms.
+   *
+   * What separates them is not more contrast, it is space. A narrower torso,
+   * arms that leave at a wider angle, and a real gap under the head. The head
+   * then gets its own radial gradient so it reads as a sphere in front of the
+   * body rather than a bump on top of it — the one place a flat fill was
+   * costing the whole figure.
+   */
+  const legW = h * 0.11;
+  line(x - h * 0.085, footY - legW / 2, x - h * 0.085, footY - h * 0.32, legW);
+  line(x + h * 0.085, footY - legW / 2, x + h * 0.085, footY - h * 0.32, legW);
+
+  line(x, footY - h * 0.3, x, footY - h * 0.6, h * 0.19);
+
+  // The arms open into a wide V and the hands land exactly on the crown's
+  // lower corners. Held closer in they ran up either side of the head and the
+  // three merged into one white mass again — the arms have to clear the head
+  // by more than their own width for the gesture to read at all.
+  const armW = h * 0.085;
+  line(x - h * 0.09, footY - h * 0.55, x - h * 0.24, footY - h * 0.93, armW);
+  line(x + h * 0.09, footY - h * 0.55, x + h * 0.24, footY - h * 0.93, armW);
+
+  const headR = h * 0.125;
+  const headY = footY - h * 0.745;
+  ctx.beginPath();
+  ctx.arc(x, headY, headR, 0, Math.PI * 2);
+  if (solid) {
+    const g = ctx.createRadialGradient(
+      x - headR * 0.4,
+      headY - headR * 0.45,
+      headR * 0.1,
+      x,
+      headY,
+      headR * 1.35,
+    );
+    g.addColorStop(0, css(WHITE));
+    g.addColorStop(0.5, css(p.top));
+    g.addColorStop(1, css(mix(p.left, p.right, 0.5)));
+    ctx.fillStyle = g;
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = css(p.ink, 0.32);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  drawCrownShape(ctx, p, x, footY - h * 0.99, h * 0.52, h * 0.24, solid);
 }
 
 function drawRipple(

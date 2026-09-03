@@ -26,11 +26,28 @@ import { formatEth } from "@/lib/economics";
 import { previewLabel } from "@/lib/preview";
 
 export function HillStage() {
-  const { now, preview, setPreview, live, changes, leader, king, remaining, pot, epoch } =
-    useHill();
+  const {
+    now,
+    preview,
+    setPreview,
+    live,
+    changes,
+    standings,
+    leader,
+    king,
+    remaining,
+    pot,
+    epoch,
+  } = useHill();
 
   const hasReign = leader !== null;
   const kingName = king ? (previewLabel(king.holder) ?? shortAddress(king.holder)) : null;
+  // The crown holder's OWN banked time, looked up by address rather than taken
+  // from the leader row that happens to be first.
+  const kingSeconds = king
+    ? (standings.find((s) => s.holder === king.holder)?.seconds ?? 0)
+    : null;
+  const leadIsElsewhere = !!king && !!leader && leader.holder !== king.holder;
 
   return (
     <div className="mt-10 sm:mt-14">
@@ -80,9 +97,22 @@ export function HillStage() {
           </div>
         </div>
 
-        {/* Bottom: who holds it. Centred under the tile it describes. */}
-        <div className="pointer-events-none absolute right-0 bottom-0 left-0 flex justify-center">
-          <div className="plate pointer-events-auto flex items-center gap-4 px-4 py-2.5">
+        {/*
+          Who holds it — and the duration beside a name has to be THAT name's.
+          It was the leader's, which is a different address the moment somebody
+          takes the crown from the wallet that has held it longest: the plate
+          read "wallet C · 24m 55s" while C had held for twelve minutes and A
+          had the 24. Wrong in the one place the whole rule lives.
+
+          Since the two do come apart, the split is worth showing rather than
+          hiding: the crown is who is on top now, the lead is who is winning
+          the hour. That gap IS the game.
+
+          Below sm it sits under the model instead of on it — over the canvas
+          it landed on the preview mark in the corner.
+        */}
+        <div className="static mt-3 flex justify-center sm:pointer-events-none sm:absolute sm:right-0 sm:bottom-0 sm:left-0 sm:mt-0">
+          <div className="plate flex flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2.5 sm:pointer-events-auto">
             <span className="flex items-center gap-2.5">
               <span
                 className={clsx(
@@ -93,17 +123,23 @@ export function HillStage() {
               />
               <Label>On the hill</Label>
             </span>
-            <span className="rule-h h-4 w-px shrink-0 bg-rule" aria-hidden />
-            {hasReign && kingName ? (
-              <span className="type-data text-ink">{kingName}</span>
+            <span className="hidden h-4 w-px shrink-0 bg-rule sm:block" aria-hidden />
+            {kingName ? (
+              <span className="type-data text-ink">
+                {kingName}
+                {kingSeconds !== null && (
+                  <span className="ml-2 text-ink-mute">{formatDuration(kingSeconds)} held</span>
+                )}
+              </span>
             ) : (
               <span className="type-data text-ink-mute">Nobody yet</span>
             )}
-            {hasReign && leader && (
+            {leadIsElsewhere && leader && (
               <>
                 <span className="hidden h-4 w-px shrink-0 bg-rule sm:block" aria-hidden />
-                <span className="type-data hidden text-crown sm:block">
-                  {formatDuration(leader.seconds)} held
+                <span className="type-data text-crown">
+                  Leading: {previewLabel(leader.holder) ?? shortAddress(leader.holder)}{" "}
+                  {formatDuration(leader.seconds)}
                 </span>
               </>
             )}

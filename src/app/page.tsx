@@ -89,9 +89,16 @@ export default function Home() {
         <h2 className="type-head mt-4 max-w-[22ch] text-ink">
           Five things this project has not answered.
         </h2>
-        <ol className="mt-8 grid gap-px overflow-hidden rounded-[3px] border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-3">
+        {/*
+          Hairlines belong to the cells, not to a background showing through
+          the gaps. Five items in a three-column grid leave empty tracks, and
+          a gap-px grid over a ruled background renders those as solid grey
+          panels — a cell that looks like content nobody wrote. Overlapping
+          borders by a pixel means an empty track is simply nothing.
+        */}
+        <ol className="mt-8 grid overflow-hidden rounded-[3px] sm:grid-cols-2 lg:grid-cols-3">
           {open.map((item, index) => (
-            <li key={item} className="bg-field-lit p-5">
+            <li key={item} className="-mt-px -ml-px border border-rule bg-field-lit p-5">
               <Label>{String(index + 1).padStart(2, "0")}</Label>
               <p className="type-body mt-3 text-ink-soft">{item}</p>
             </li>

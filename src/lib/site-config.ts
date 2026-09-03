@@ -3,17 +3,17 @@ export const siteConfig = {
   // nav, OG image); `wordmark` is the title-case form the hero sets; `ticker`
   // is derived from it. Nothing else on the site spells the name out, so a
   // rename is these three strings plus the env prefix below.
-  name: "HILL",
-  wordmark: "Hill",
-  ticker: "$HILL",
+  name: "KINGHILL",
+  wordmark: "Kinghill",
+  ticker: "$KING",
   tagline: "One tile. One hour. One king.",
   description:
     "A single tile at the centre. Whoever holds the most tokens through an hour wears the crown and takes every fee that hour collected. Buy more, take it.",
   seoDescription:
     "King of the hill, on chain. One tile, one hour, one winner — the longest reign of each hour takes 100% of that hour's trading fees.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://hill.example",
-  x: process.env.NEXT_PUBLIC_HILL_X ?? null,
-  telegram: process.env.NEXT_PUBLIC_HILL_TELEGRAM ?? null,
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://kinghill.example",
+  x: process.env.NEXT_PUBLIC_KINGHILL_X ?? null,
+  telegram: process.env.NEXT_PUBLIC_KINGHILL_TELEGRAM ?? null,
 } as const;
 
 function envOrNull(value: string | undefined): string | null {
@@ -34,16 +34,16 @@ function envOrNull(value: string | undefined): string | null {
  */
 export const contracts = {
   tokenAddress: envOrNull(
-    process.env.NEXT_PUBLIC_HILL_TOKEN_ADDRESS,
+    process.env.NEXT_PUBLIC_KINGHILL_TOKEN_ADDRESS,
   ) as `0x${string}` | null,
   crownAddress: envOrNull(
-    process.env.NEXT_PUBLIC_HILL_CROWN_ADDRESS,
+    process.env.NEXT_PUBLIC_KINGHILL_CROWN_ADDRESS,
   ) as `0x${string}` | null,
   /** The pool the fee is collected from. Excluded from the standings. */
   poolAddress: envOrNull(
-    process.env.NEXT_PUBLIC_HILL_POOL_ADDRESS,
+    process.env.NEXT_PUBLIC_KINGHILL_POOL_ADDRESS,
   ) as `0x${string}` | null,
-  isLive: process.env.NEXT_PUBLIC_HILL_LIVE === "true",
+  isLive: process.env.NEXT_PUBLIC_KINGHILL_LIVE === "true",
 } as const;
 
 /** The token exists and can be read. */

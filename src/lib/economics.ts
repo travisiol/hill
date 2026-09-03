@@ -1,7 +1,7 @@
 /*
  * The pot.
  *
- * Every trade in $HILL pays a fee. The fee goes into the hour it was paid in,
+ * Every trade in the token pays a fee. The fee goes into the hour it was paid in,
  * and at the bell the whole hour goes to whoever wore the crown longest. That
  * is the entire economy and it fits in one paragraph on purpose.
  *

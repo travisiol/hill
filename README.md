@@ -1,7 +1,7 @@
-# HILL — one tile, one hour, one king
+# KINGHILL — one tile, one hour, one king
 
 King of the hill, on chain, with one square in the middle and nothing else to
-do. Hold more `$HILL` than anybody, take the crown, and the contract counts
+do. Hold more `$KING` than anybody, take the crown, and the contract counts
 every second you keep it. When the hour ends, whoever wore it longest takes
 **100% of that hour's trading fees**.
 
@@ -102,27 +102,49 @@ others are the example.
 
 ## The drawing
 
-One machined tile on a bench, in real perspective, drawn frame by frame into a
-2D canvas. No WebGL, no textures, no raster assets.
+One machined block on a bench, whoever holds the crown standing on top of it
+with both arms up, and everybody else in this hour crowded around the base.
+Real perspective, drawn frame by frame into a 2D canvas. No WebGL, no textures,
+no raster assets.
 
 - **The light is the clock.** The key light makes one turn per hour, placed
   opposite the minute hand so the cast shadow lies *along* the hand and the two
   are one instrument rather than two clocks disagreeing.
 - **The ring is the hour.** Every reign is an arc of it; the longest arc is
   amber, because the longest arc is the one that gets paid.
-- **Amber means worn.** The crown runs through the tile's chamfer and is a
-  dashed hairline until somebody actually holds it. Before launch there is no
-  amber in the canvas at all.
+- **The crowd is the standings.** The figure on top is whoever holds the crown.
+  Each solid figure at the base is an address that has actually banked time
+  this hour, in rank order and nearest the reader first. The remaining places
+  are outlines, because an empty place is somewhere nobody is standing.
+- **Amber means worn**, and there is exactly one amber object: the crown. The
+  podium carries no colour of its own. Before launch the crown is a dashed
+  outline above an empty throne and there is no amber in the canvas at all.
 
 Notes from the passes that mattered, since they are not obvious from the code:
 
-- The tile is **turned 35°**. Square to the camera it showed one flat face and
+- The block is **turned 35°**. Square to the camera it showed one flat face and
   read as an elevation drawing. 35° and not 45° because at 45° the two faces
   are identical and the silhouette becomes a symmetrical diamond, which is a
   logo.
-- The camera came **up from 26° to 33°**. The low camera foreshortened the far
+- It is **0.62 tall, not 0.4**. A plate is something you put an object on; this
+  game is about a block people climb. Not a true cube either — matching the
+  reference exactly would mean 1.52, which buries the hour ring behind it.
+- The camera came **up from 26° to 33°**. The low angle foreshortened the far
   half of the dial so hard that `:00` projected to the same height as the
-  tile's far corner and disappeared behind it.
+  block's far corner and disappeared behind it.
+- **The king's arms have to clear his head by more than their own width.** A
+  0.25h torso with arms leaving at a narrow angle, all painted from one
+  gradient, merged into a single white column and the figure lost both arms and
+  its head. The head then needs its own radial gradient to read as a sphere in
+  front of the body rather than a bump on top of it.
+- **The crowd is ordered from the front of the ring outward.** Ordered from
+  `:00` — which is the *far* side — both real contenders in the worked hour
+  were filed behind the block, where the podium hid the only two solid figures
+  on the bench.
+- The **quarter marks are drawn last, over everything**. They are annotations
+  on a drawing, not objects in the scene: in depth order `:00` sits directly
+  behind whoever is on the podium and vanished behind the crown, and a dial
+  missing its twelve is not a dial.
 - Brushing on the top face is **linear, not concentric**. Circles on a square
   face came out as a bullseye and the object read as a target.
 - The stage height tracks **width, not viewport height** — the model is sized
@@ -133,13 +155,18 @@ Notes from the passes that mattered, since they are not obvious from the code:
   backgrounded tab — that was 378px of horizontal scroll on a phone from an
   element that is nominally `w-full`.
 
+The mark is the same scene reduced to three shapes: the block, a figure on it,
+the crown. Its crown is **filled** where the canvas draws an outline — the
+canvas is a readout and has to report an empty throne, a mark is an identity
+and has to be the same tomorrow.
+
 ## Running it
 
 ```bash
 npm install && npm run dev
 ```
 
-Port 3214. Copy `.env.example` to `.env.local` if you have addresses to point
+Port 3214, from a folder still named `hill` — the repository was not renamed with the project. Copy `.env.example` to `.env.local` if you have addresses to point
 at; without them the site is honest and inert, which is its default state.
 
 ## Not decided yet
@@ -162,13 +189,13 @@ None of these are stated as settled anywhere on the site.
 
 The name lives in three strings in
 [`src/lib/site-config.ts`](src/lib/site-config.ts) — `name`, `wordmark`,
-`ticker` — plus the `NEXT_PUBLIC_HILL_*` env prefix. Nothing else on the site
+`ticker` — plus the `NEXT_PUBLIC_KINGHILL_*` env prefix. Nothing else on the site
 spells it out, so a rename is those three strings and the prefix. Do not
 grep-and-replace through the components.
 
 ## Standing warning
 
-`$HILL` is a game with an hourly payout, not an investment, and it should be
+`$KING` is a game with an hourly payout, not an investment, and it should be
 treated as money you are willing to lose. Nothing here is financial advice. The
 chain values in `src/lib/chain.ts` came from public third-party sources and
 must be re-verified against the official documentation before this app is

@@ -29,9 +29,24 @@ export default function OpengraphImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none">
-            <path d="M12 4.6 20 9.2 12 13.8 4 9.2Z" fill="#d9dde2" />
-            <path d="M4 9.2 12 13.8v5.6L4 14.8Z" fill="#a8b0b9" />
-            <path d="M20 9.2 12 13.8v5.6l8-4.6Z" fill="#7f8891" />
+            <path d="M12 13.4 20 16.8 12 20.2 4 16.8Z" fill="#d9dde2" />
+            <path d="M4 16.8 12 20.2v2.5L4 19.3Z" fill="#a8b0b9" />
+            <path d="M20 16.8 12 20.2v2.5l8-3.4Z" fill="#7f8891" />
+            <path
+              d="M11.1 15.3v-1.9M12.9 15.3v-1.9"
+              stroke="#a8b0b9"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+            />
+            <path d="M12 13.6v-2.2" stroke="#d9dde2" strokeWidth="2.2" strokeLinecap="round" />
+            <path
+              d="M11 12.4 9 9M13 12.4 15 9"
+              stroke="#a8b0b9"
+              strokeWidth="1.1"
+              strokeLinecap="round"
+            />
+            <circle cx="12" cy="10" r="1.5" fill="#f4f6f8" />
+            <path d="M8.4 8.8V5.4l1.9 1.5L12 4.6l1.7 2.3 1.9-1.5v3.4Z" fill="#9a5a06" />
           </svg>
           <span
             style={{
@@ -75,23 +90,30 @@ export default function OpengraphImage() {
             </div>
           </div>
 
-          {/* The tile on its ring, at the model's angle. */}
-          <svg width="330" height="250" viewBox="0 0 330 250" fill="none">
-            <ellipse cx="165" cy="168" rx="150" ry="58" stroke="#101317" strokeOpacity="0.12" />
-            <ellipse cx="165" cy="168" rx="126" ry="49" stroke="#101317" strokeOpacity="0.12" />
+          {/* The scene, at the model's angle: the hour ring with the winning
+              arc on it, the block, and whoever is standing on top. */}
+          <svg width="330" height="260" viewBox="0 0 330 260" fill="none">
+            <ellipse cx="165" cy="186" rx="150" ry="56" stroke="#101317" strokeOpacity="0.14" />
+            <ellipse cx="165" cy="186" rx="126" ry="47" stroke="#101317" strokeOpacity="0.14" />
             <path
-              d="M165 110 A150 58 0 0 1 296 196 L272 183 A126 49 0 0 0 165 119 Z"
+              d="M165 130 A150 56 0 0 1 293 212 L269 200 A126 47 0 0 0 165 139 Z"
               fill="#e39a2a"
             />
-            <path d="M165 60 L262 106 L165 152 L68 106 Z" fill="#d9dde2" />
-            <path d="M68 106 L165 152 V196 L68 150 Z" fill="#a8b0b9" />
-            <path d="M262 106 L165 152 V196 L262 150 Z" fill="#7f8891" />
-            <path
-              d="M165 54 L274 106 L165 158 L56 106 Z"
-              stroke="#9a5a06"
-              strokeWidth="2.5"
-              strokeLinejoin="round"
-            />
+            {/* crowd */}
+            <path d="M64 196a11 11 0 0 1 22 0v18H64Z" fill="#c3c9d0" />
+            <circle cx="75" cy="176" r="8" fill="#c3c9d0" />
+            <path d="M244 196a11 11 0 0 1 22 0v18h-22Z" fill="#c3c9d0" />
+            <circle cx="255" cy="176" r="8" fill="#c3c9d0" />
+            {/* the block */}
+            <path d="M165 82 262 128 165 174 68 128Z" fill="#d9dde2" />
+            <path d="M68 128 165 174v46L68 174Z" fill="#a8b0b9" />
+            <path d="M262 128 165 174v46l97-46Z" fill="#7f8891" />
+            {/* the king */}
+            <path d="M158 82v-16M172 82V66" stroke="#a8b0b9" strokeWidth="7" strokeLinecap="round" />
+            <path d="M152 58 136 26M178 58l16-32" stroke="#a8b0b9" strokeWidth="7" strokeLinecap="round" />
+            <path d="M165 62V36" stroke="#c8ced5" strokeWidth="15" strokeLinecap="round" />
+            <circle cx="165" cy="30" r="11" fill="#e6eaee" />
+            <path d="M133 24V2l16 12 16-18 16 18 16-12v22Z" fill="#e39a2a" />
           </svg>
         </div>
       </div>

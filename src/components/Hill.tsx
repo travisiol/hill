@@ -189,7 +189,7 @@ const TILE_H = 0.4;
 // Wide enough to be a band rather than a line: the crown lives on it, and at
 // 0.048 the amber came out as a stroke around the top face — a frame laid on
 // the tile instead of the rim of the tile itself.
-const CHAMFER = 0.078;
+const CHAMFER = 0.064;
 const RING_IN = 1.52;
 const RING_OUT = 1.74;
 const TICK_OUT = 1.84;
@@ -923,8 +923,15 @@ function drawTile(
        * between something decorated and something lit.
        */
       if (worn) {
-        grad.addColorStop(0, css(mix(p.crownLit, WHITE, 0.35 + lambert * 0.3)));
-        grad.addColorStop(1, css(mix(p.crown, p.crownLit, 0.25 + lambert * 0.4)));
+        // Amber mixed INTO the face's own tone rather than laid over it, so
+        // the chamfer still shades with the light. Replaced outright it came
+        // out as a flat gold strip — a frame around the tile instead of metal
+        // that has gone hot.
+        grad.addColorStop(
+          0,
+          css(mix(mix(bodyTop, p.crownLit, 0.82), WHITE, 0.22 + lambert * 0.28)),
+        );
+        grad.addColorStop(1, css(mix(mix(bodyBase, p.crown, 0.8), p.crownLit, lambert * 0.45)));
       } else {
         grad.addColorStop(0, css(mix(bodyTop, p.topLit, 0.55)));
         grad.addColorStop(1, css(mix(bodyTop, p.edge, 0.2)));

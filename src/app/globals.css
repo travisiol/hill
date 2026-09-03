@@ -1,0 +1,303 @@
+@import "tailwindcss";
+
+/*
+ * HILL — one tile, one hour, one king.
+ *
+ * The whole page is one object photographed on a bench in daylight: a single
+ * machined tile, standing on a pale field, under a light that swings through
+ * the hour. Nothing is dark, nothing glows, nothing is gold. That is the
+ * argument, not the decoration.
+ *
+ * A game that pays out every hour has one credibility problem and it is not
+ * ambition — it is that the genre already looks a certain way. Black stage,
+ * volumetric beam, gold crown, particles. Everything that has ever taken
+ * money and left reads exactly like that. So this one is shot in daylight
+ * with the numbers spelled out and no effect that a reader has to trust.
+ *
+ * Two states, and the difference is the whole system.
+ *
+ *   LIGHT is real. If a thing has a lit face, a shaded face and a shadow on
+ *   the field, it exists: the tile, the field, the hour ring. The hour itself
+ *   is real from day one — it is the clock, and the clock does not need a
+ *   contract to be true — so the ring turns and the shadow sweeps before
+ *   anything is deployed.
+ *
+ *   LINE is held. A hairline is a thing that is drawn and not yet standing:
+ *   the empty crown band on the tile, every figure the chain has not
+ *   confirmed. It is the same weight everywhere so held states cannot be
+ *   mistaken for quiet ones.
+ *
+ * Colour is rationed to one. CROWN amber marks two things and nothing else:
+ * the crown while it is actually worn, and money that has actually moved.
+ * Before launch it appears nowhere on the page, which is the correct amount
+ * of amber for a game nobody has played yet. There is deliberately no warning
+ * colour — an amber lamp lets a held state look designed instead of saying
+ * the word, so held states here write "awaiting launch" in text.
+ */
+:root {
+  /* The bench. Cool, not warm: this is a workshop, not a gallery. */
+  --field: #eef0f2;
+  --field-lit: #f9fafb;
+  --field-deep: #e2e5e9;
+
+  /* Machined nickel, one light source from the upper left, so the ordering
+     of these four tones is fixed and every face on the page obeys it. */
+  --tile-top: #d9dde2;
+  --tile-top-lit: #f4f6f8;
+  --tile-left: #a8b0b9;
+  --tile-right: #7f8891;
+  --tile-edge: #5c646d;
+
+  --ink: #101317;
+  --ink-soft: #454c55;
+  /* Measured on --field, not eyeballed: 5.1:1. The 10px annotations are the
+     smallest type on the page and they were the first thing to fail. */
+  --ink-mute: #5d646d;
+
+  --rule: rgba(16, 19, 23, 0.12);
+  --rule-strong: rgba(16, 19, 23, 0.28);
+
+  /* Worn, or paid. Never anything else. Measured 4.9:1 on --field. */
+  --crown: #9a5a06;
+  --crown-soft: rgba(154, 90, 6, 0.32);
+  --crown-faint: rgba(154, 90, 6, 0.1);
+  /* The light the crown throws on the model. Not for type — 2.2:1. */
+  --crown-lit: #e39a2a;
+
+  --shadow: rgba(16, 19, 23, 0.16);
+}
+
+@theme inline {
+  --color-field: var(--field);
+  --color-field-lit: var(--field-lit);
+  --color-field-deep: var(--field-deep);
+  --color-tile-top: var(--tile-top);
+  --color-tile-left: var(--tile-left);
+  --color-tile-right: var(--tile-right);
+  --color-tile-edge: var(--tile-edge);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-mute: var(--ink-mute);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-crown: var(--crown);
+  --color-crown-soft: var(--crown-soft);
+  --color-crown-faint: var(--crown-faint);
+  --color-crown-lit: var(--crown-lit);
+
+  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--field);
+    color: var(--ink);
+    font-feature-settings: "cv05" 1, "ss01" 1;
+    -webkit-font-smoothing: antialiased;
+    /* The bench has a light on it, and the light does not move with scroll. */
+    background-image:
+      radial-gradient(120% 70% at 22% -10%, rgba(255, 255, 255, 0.95), transparent 62%),
+      radial-gradient(90% 60% at 92% 8%, rgba(255, 255, 255, 0.6), transparent 58%);
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background: var(--ink);
+    color: var(--field-lit);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /*
+   * Type. One family across the range, weight 400 even at display size —
+   * a headline set in bold is shouting, and this page's whole posture is
+   * that it does not need to.
+   */
+  .type-display {
+    font-size: clamp(2.75rem, 8.2vw, 6.5rem);
+    line-height: 0.93;
+    letter-spacing: -0.035em;
+    font-weight: 400;
+  }
+
+  .type-head {
+    font-size: clamp(1.65rem, 3.4vw, 2.6rem);
+    line-height: 1.06;
+    letter-spacing: -0.024em;
+    font-weight: 400;
+  }
+
+  .type-sub {
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    line-height: 1.42;
+    letter-spacing: -0.014em;
+    font-weight: 400;
+  }
+
+  .type-body {
+    font-size: 0.95rem;
+    line-height: 1.62;
+    letter-spacing: -0.006em;
+  }
+
+  /* Annotations on the drawing. Mono, tracked out, never bold. */
+  .type-label {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    line-height: 1.2;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .type-data {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+  }
+
+  /* A number that is the point of its block. Tabular so it cannot jitter
+     while it counts — a figure that dances while it updates reads as an
+     animation rather than a reading. */
+  .type-figure {
+    font-family: var(--font-mono);
+    font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .type-figure-lg {
+    font-family: var(--font-mono);
+    font-size: clamp(2rem, 5.2vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * A panel is a milled plate lying on the bench: a hairline edge, a lit top
+   * edge, and a shadow that says which way is up. Never a card with a border
+   * radius picked at random — the radius here is 3px on everything flat and
+   * 999px on everything that is pressed, and there is nothing in between.
+   */
+  .plate {
+    background: linear-gradient(180deg, var(--field-lit), var(--field));
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(16, 19, 23, 0.05),
+      0 10px 24px -18px var(--shadow);
+  }
+
+  .plate-sunk {
+    background: linear-gradient(180deg, var(--field-deep), var(--field));
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    box-shadow: inset 0 2px 5px -2px rgba(16, 19, 23, 0.13);
+  }
+
+  /* The hairline grid under the model. Construction, so it sits below
+     everything and never competes with a real edge. */
+  .bench-grid {
+    background-image:
+      linear-gradient(to right, var(--rule) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+    background-size: 56px 56px;
+    -webkit-mask-image: radial-gradient(72% 62% at 50% 46%, #000 22%, transparent 78%);
+    mask-image: radial-gradient(72% 62% at 50% 46%, #000 22%, transparent 78%);
+  }
+
+  .rule-h {
+    height: 1px;
+    background: var(--rule);
+  }
+
+  /*
+   * Held. The pulse is slow and the dot never goes fully out, so a state that
+   * is waiting does not read as a state that is broken. The word does the
+   * work; this only makes it findable.
+   */
+  .awaiting {
+    animation: awaiting 2.8s ease-in-out infinite;
+  }
+
+  @keyframes awaiting {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* Sections arrive once, on their own, and stay. Nothing on this page
+     animates on a loop except the model and the clock, both of which are
+     showing something that is actually moving. */
+  .rise {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes rise {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* A figure that just changed. One flash, no colour unless it earned one. */
+  .struck {
+    animation: struck 0.5s ease-out;
+  }
+
+  @keyframes struck {
+    0% {
+      background-color: var(--crown-faint);
+    }
+    100% {
+      background-color: transparent;
+    }
+  }
+}
+
+@layer utilities {
+  .pause-when-hidden {
+    animation-play-state: running;
+  }
+}
